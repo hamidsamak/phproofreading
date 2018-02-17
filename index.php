@@ -24,6 +24,7 @@ $languages = $phproofreading->languages();
 	mark { cursor: pointer; }
 	.tooltip-inner { text-align: inherit; }
 	.replacements .btn { margin-bottom: 5px; }
+	div.advanced { display: none; }
 	</style>
 </head>
 <body>
@@ -53,6 +54,14 @@ $languages = $phproofreading->languages();
 			</div>
 			<div class="form-group row">
 				<div class="offset-sm-2 col-sm-10">
+					<a href="#" class="advanced">Advanced options</a>
+					<div class="advanced">
+						<label><input name="auto_fix" type="checkbox" value="1"<?php if (isset($_POST['auto_fix'])) print ' checked'; ?>> Automatically fix with first replacement</label>
+					</div>
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="offset-sm-2 col-sm-10">
 					<button type="submit" class="btn btn-primary">Check Text</button>
 				</div>
 			</div>
@@ -75,7 +84,12 @@ $languages = $phproofreading->languages();
 				<?php if ($count < 1) { ?>
 				<div class="alert alert-success">No errors were found.</div>
 				<?php } else { ?>
+
+				<?php if (isset($_POST['auto_fix'])) { ?>
+				<div class="alert alert-success"><?=$count?> error<?php if ($count > 1) print 's'; ?> fixed.</div>
+				<?php } else { ?>
 				<div class="alert alert-warning"><?=$count?> error<?php if ($count > 1) print 's'; ?> found.</div>
+				<?php } ?>
 
 				<div class="card bg-light text-dark">
 					<div class="card-block">
@@ -85,14 +99,18 @@ $languages = $phproofreading->languages();
 						mb_internal_encoding('UTF-8');
 
 						foreach ($check['matches'] as $key => $match) {
-							$tooltip = '<p>' . $match['message'] . '</p><div class="replacements">';
+							if (isset($_POST['auto_fix']) && count($match['replacements']) > 0) {
+								$text = mb_substr($text, 0, $match['offset']) . '<em>' . $match['replacements'][0]['value'] . '</em>' . mb_substr($text, $match['offset'] + $match['length']);
+							} else {
+								$tooltip = '<p>' . $match['message'] . '</p><div class="replacements">';
 
-							foreach ($match['replacements'] as $replacement)
-								$tooltip .= '<button type="button" class="btn-correct btn btn-sm btn-success" data-mark="' . $key . '">' . $replacement['value'] . '</button> ';
+								foreach ($match['replacements'] as $replacement)
+									$tooltip .= '<button type="button" class="btn-correct btn btn-sm btn-success" data-mark="' . $key . '">' . $replacement['value'] . '</button> ';
 
-							$tooltip .= '</div>';
+								$tooltip .= '</div>';
 
-							$text = mb_substr($text, 0, $match['offset']) . '<mark id="mark_' . $key . '" data-toggle="tooltip" data-html="true" title="' . htmlspecialchars($tooltip) . '">' . mb_substr($text, $match['offset'], $match['length']) . '</mark>' . mb_substr($text, $match['offset'] + $match['length']);
+								$text = mb_substr($text, 0, $match['offset']) . '<mark id="mark_' . $key . '" data-toggle="tooltip" data-html="true" title="' . htmlspecialchars($tooltip) . '">' . mb_substr($text, $match['offset'], $match['length']) . '</mark>' . mb_substr($text, $match['offset'] + $match['length']);
+							}
 						}
 
 						print nl2br($text);
@@ -135,6 +153,16 @@ $languages = $phproofreading->languages();
 		$("body").on("click", function(){
 			$('[data-toggle="tooltip"]').tooltip("hide");
 		});
+
+		$("a.advanced").click(function(event){
+			event.preventDefault();
+
+			$(this).hide().next().show();
+		});
+
+		<?php if (isset($_POST['auto_fix'])) { ?>
+		$("a.advanced").click();
+		<?php } ?>
 	});
 	</script>
 </body>
