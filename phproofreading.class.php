@@ -19,6 +19,10 @@ class PHProofReading{
 					'method'  => 'POST',
 					'header'  => 'Content-type: application/x-www-form-urlencoded',
 					'content' => http_build_query($post_data)
+				],
+				'ssl' => [
+					'verify_peer' => false,
+					'verify_peer_name' => false
 				]
 			];
 
