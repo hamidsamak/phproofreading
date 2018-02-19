@@ -8,7 +8,7 @@
  * @link http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class PHProofReading{
-	public $languages_cache_file = PATH . '.languages';
+	public $languages_cache_file = '.languages';
 
 	private function request($url, $post_data = []) {
 		$context = null;

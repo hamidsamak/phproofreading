@@ -5,6 +5,7 @@ define('PATH', __DIR__ . DIRECTORY_SEPARATOR);
 require PATH . 'phproofreading.class.php';
 
 $phproofreading = new PHProofReading();
+$phproofreading->languages_cache_file = PATH . $phproofreading->languages_cache_file;
 $languages = $phproofreading->languages();
 
 ?>
